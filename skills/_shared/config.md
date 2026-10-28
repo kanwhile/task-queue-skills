@@ -11,6 +11,7 @@
 | `tracker` | `kind:` หนึ่งใน `notion` · `github-project` · `github-issues` ตามด้วยค่าเฉพาะ kind (ดู `trackers.md`) | ทุกสกิล |
 | `สถานะ` | ชื่อจริงบนบอร์ดของสถานะ canonical 4 ตัว: `queued` (พร้อมให้ agent หยิบ) · `in-progress` · `in-review` (เปิด PR แล้ว) · `unclear` (ถามเจ้าของแล้วถอยออกจากคิว) · สำหรับ `github-issues` ค่าคือชื่อ label | ทุกสกิล |
 | `บัญชี` | `acct:` ชื่อบัญชีของ `budget-check` · `CLAUDE_CONFIG_DIR` = `~/.claude` เมื่อ acct เป็น `default` นอกนั้น `~/.claude-<acct>` · ไม่มีหัวข้อ → `budget-check --pick` เลือกให้ตอนเริ่มรอบ | run · pick |
+| `โมเดล` | rubric เลือกโมเดลของ Claude ที่ถือการ์ด: บรรทัด `default: <model id>` แล้วตามด้วยกฎ `- <เงื่อนไขที่อ่านได้จากการ์ดก่อนเริ่ม> → <model id>` ข้อแรกที่ตรงชนะ · `conflict: <model id>` สำหรับโหมดแก้ conflict · โหมดแก้รีวิวใช้โมเดลเดิมของการ์ดจาก `task.md` · ไม่มีหัวข้อ = ไม่ส่ง `--model` (ค่าตั้งของบัญชี) | run · pick |
 | `ขีดจำกัด` | `PR เปิดค้าง:` N · run-task-queue หยุดหยิบการ์ดใหม่เมื่อ PR ที่คิวเปิดไว้ยังเปิดอยู่ครบ N (ไม่มีหัวข้อ = 3) | run |
 | `ก่อนทุกรอบ` | สกิล/คำสั่งที่ run-task-queue รันก่อนข้ออื่นทุกรอบ | run |
 | `branch` | pattern ชื่อ branch เช่น `slice/<n>-<ชื่อ>` (ไม่มี = `task/<n>-<ชื่อ>`) | pick |

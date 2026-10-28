@@ -42,20 +42,23 @@ argument `--dry-run`: ทำข้อ 1–6 แล้วรายงานตา
    2. การ์ดใบแรกในกลุ่มแก้รีวิว
    3. PR เปิดค้าง ≥ `ขีดจำกัด` → จบรอบ
    4. การ์ดบนสุดของคิว (อ่านคิวตาม `trackers.md`) ที่ไม่ถูก Blocked by · คิวว่างหรือถูกบล็อกหมด → จบรอบ
-6. จดไว้: `<ref>` · เลขของการ์ด · โหมด (ใหม่ / แก้ conflict / แก้รีวิว)
+6. จดไว้: `<ref>` · เลขของการ์ด · โหมด (ใหม่ / แก้ conflict / แก้รีวิว) · **โมเดล** ตามหัวข้อ `โมเดล` ของ config:
+   - ใหม่: อ่านการ์ด (Type · Priority · AC · ชื่อ) แล้วไล่กฎจากบนลงล่าง ข้อแรกที่ตรงชนะ ไม่ตรงเลยใช้ `default` · จดด้วยว่าตรงกฎข้อไหน
+   - แก้ conflict: `conflict` ของ config (ไม่มี = `default`)
+   - แก้รีวิว: บรรทัด `โมเดล:` ในหัว `task.md` ของการ์ด (`grep -l "<ref>" <root>/.tasks/*/task.md`) ไม่มีบรรทัดนั้นใช้ `default`
 
 ## รายงาน dry-run
-พิมพ์ตารางแล้วจบ: PR ค้างแต่ละใบกับกลุ่มที่จัด · PR เปิดค้าง n/ขีดจำกัด · คิว 5 ใบแรกพร้อมเหตุที่ข้าม (ถูกบล็อกโดย #n · draft) · บรรทัดสุดท้าย "รอบนี้จะเปิด tab ให้ `<ref>` โหมด <…>" หรือ "รอบนี้ไม่เปิดอะไร เพราะ <ข้อที่หยุด>"
+พิมพ์ตารางแล้วจบ: PR ค้างแต่ละใบกับกลุ่มที่จัด · PR เปิดค้าง n/ขีดจำกัด · คิว 5 ใบแรกพร้อมเหตุที่ข้าม (ถูกบล็อกโดย #n · draft) และโมเดลที่กฎเลือกให้แต่ละใบ · บรรทัดสุดท้าย "รอบนี้จะเปิด tab ให้ `<ref>` โหมด <…> โมเดล <…> (กฎข้อ <…>)" หรือ "รอบนี้ไม่เปิดอะไร เพราะ <ข้อที่หยุด>"
 
 ## เปิด session ใหม่
 7. สร้าง tab ใหม่ใน workspace ปัจจุบัน แล้วอ่าน `.result.tab.tab_id` กับ `.result.root_pane.pane_id` จาก JSON ที่ตอบกลับ
    `herdr tab create --workspace "$HERDR_WORKSPACE_ID" --cwd <root> --label task-<เลข> --env CLAUDE_CONFIG_DIR=<dir ของ acct> --no-focus`
    ต้องใส่ `--env` เสมอ เพราะ `herdr agent start --kind claude` รัน `claude` เปล่า ซึ่งได้ config `~/.claude` ที่อาจเป็นบัญชีผิด
    ไม่ต้องสร้าง worktree เอง เพราะ `/pick-task` ย้ายตัวเองเข้า worktree ก่อนเริ่มทำงาน
-8. เริ่ม Claude ใน pane นั้น: `herdr agent start task-<เลข> --kind claude --pane <root_pane> --timeout 120000`
+8. เริ่ม Claude ใน pane นั้น: `herdr agent start task-<เลข> --kind claude --pane <root_pane> --timeout 120000 -- --model <โมเดล>` (ตัด `-- --model …` ถ้า config ไม่มีหัวข้อ `โมเดล`)
    ได้ `agent_not_ready … blocked during startup` ให้ `herdr agent read task-<เลข> --source visible` ก่อน: ถ้าเป็นหน้าถาม trust folder ของ Claude (เจอครั้งแรกของแต่ละบัญชีต่อ repo) ให้ `herdr agent send-keys task-<เลข> down enter` แล้ว `herdr agent wait task-<เลข> --until idle --timeout 90000` เพราะ repo นี้เป็นของเจ้าของเอง · หน้าอื่นที่ไม่ใช่ trust ให้ notification แล้วจบรอบ ไม่ตอบแทน
-9. จดโควตาก่อนเริ่ม: `budget-check --log <repo>/task-<เลข> before --acct <acct>`
-   แล้วส่งงาน: `herdr agent prompt task-<เลข> "/pick-task <ref>" --wait --timeout 7200000`
+9. จดโควตาก่อนเริ่ม: `budget-check --log <repo>/task-<เลข> before --acct <acct> --tier <sonnet|opus|haiku ตามโมเดล>`
+   แล้วส่งงาน: `herdr agent prompt task-<เลข> "/pick-task <ref> --model <โมเดล>" --wait --timeout 7200000` (ไม่มีโมเดลก็ไม่ต้องใส่ `--model`)
    ทุกโหมดใช้คำสั่งเดียวกัน `/pick-task` รู้โหมดจากสถานะใน `task.md` ของการ์ด
    รันเป็น background command เพราะ Bash ที่รอผลรอได้นานสุด 10 นาที แต่งานหนึ่งใบใช้ 15–60 นาที บวก self-review กับ ci ตาม config
 

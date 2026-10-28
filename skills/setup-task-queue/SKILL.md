@@ -16,6 +16,7 @@ description: ตั้ง repo ปัจจุบันให้ใช้ /run-t
    - tracker ที่มีอยู่: `gh api graphql` ดู `projectsV2` ที่ผูกกับ repo · `gh project list --owner <owner>` · `gh label list` · Notion ถ้าเจ้าของเคยบอก
    - บัญชี: `budget-check --all`
 3. ถาม `AskUserQuestion` รอบเดียว เฉพาะที่อนุมานไม่ได้: tracker (เสนอตัวเลือกจากข้อ 2) · บัญชี · การแบ่งงาน delegate · ขีดจำกัด PR เปิดค้าง (เสนอ 3)
+   หัวข้อ `โมเดล` ไม่ต้องถาม: ใส่ rubric จาก template แล้วให้เจ้าของแก้ตอนดูไฟล์ในข้อ 4 · `budget-check --help` บอก tier ที่ `--tier` รับ
    ชื่อสถานะไม่ต้องถาม: Notion ใช้ชื่อที่มีในบอร์ด · GitHub Project ใช้ `Todo / Ready / In Progress / In Review` · label ใช้ `ready-for-agent / in-progress / in-review / needs-info`
 4. ร่างไฟล์จาก `task-queue.template.md` ในโฟลเดอร์สกิลนี้ แล้วแสดงทั้งไฟล์ให้เจ้าของดูก่อนเขียน
    ค่าที่อนุมานได้แต่ไม่มั่นใจ ใส่ `⚠️ เดา:` นำหน้าบรรทัดนั้น ไม่ถามแยก · เจ้าของแก้แล้วค่อยเขียนลง `<root>/.claude/task-queue.md`

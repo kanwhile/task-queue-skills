@@ -30,6 +30,13 @@ acct: <ชื่อบัญชีของ budget-check>
 ## ขีดจำกัด
 PR เปิดค้าง: 3
 
+## โมเดล
+default: claude-opus-5-5
+conflict: claude-sonnet-5-5
+- Type เป็น Bug หรือ Task และ AC เป็นข้อ ๆ ชัดเจน และไม่แตะ schema/migration/กฎโดเมน → claude-sonnet-5-5
+- Type เป็น Feature หรือ AC มีคำว่า ออกแบบ · ตัดสิน · ADR · port → claude-opus-5-5
+- Priority P0 → claude-opus-5-5
+
 ## ก่อนทุกรอบ
 - <สกิลหรือคำสั่ง · ลบหัวข้อนี้ถ้าไม่มี>
 

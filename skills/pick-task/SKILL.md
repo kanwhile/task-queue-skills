@@ -8,6 +8,7 @@ description: ทำการ์ด 1 ใบจากบอร์ดของ rep
 อ่าน `config.md` และ `trackers.md` ในโฟลเดอร์สกิลนี้ก่อน · config ไม่ครบ = หยุดตามที่ `config.md` บอก
 `<TASKS>` = `<root>/.tasks` · `<root>` ตาม `config.md` · `<acct>` = จาก `บัญชี` หรือ `budget-check --pick`
 ไม่ได้รับ `<ref>` → อ่านคิวตาม `trackers.md` แล้วหยิบใบบนสุดที่ไม่ถูก Blocked by
+argument `--model <id>` = โมเดลที่ `/run-task-queue` เลือกให้ session นี้ตาม rubric ของ config · เขียนลงบรรทัด `โมเดล:` ที่หัว `task.md` ตอนสร้างไฟล์ (การ์ดเดิมที่มีไฟล์แล้วไม่แก้) เพื่อให้รอบแก้รีวิวใช้โมเดลเดิม
 
 ## เลือกโหมด
 หา `task.md` ของการ์ดด้วย `grep -l "<ref>" <TASKS>/*/task.md` (Notion ใช้ id 32 หลักของหน้า)
