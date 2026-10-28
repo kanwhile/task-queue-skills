@@ -53,6 +53,7 @@ argument `--dry-run`: ทำข้อ 1–6 แล้วรายงานตา
    ต้องใส่ `--env` เสมอ เพราะ `herdr agent start --kind claude` รัน `claude` เปล่า ซึ่งได้ config `~/.claude` ที่อาจเป็นบัญชีผิด
    ไม่ต้องสร้าง worktree เอง เพราะ `/pick-task` ย้ายตัวเองเข้า worktree ก่อนเริ่มทำงาน
 8. เริ่ม Claude ใน pane นั้น: `herdr agent start task-<เลข> --kind claude --pane <root_pane> --timeout 120000`
+   ได้ `agent_not_ready … blocked during startup` ให้ `herdr agent read task-<เลข> --source visible` ก่อน: ถ้าเป็นหน้าถาม trust folder ของ Claude (เจอครั้งแรกของแต่ละบัญชีต่อ repo) ให้ `herdr agent send-keys task-<เลข> down enter` แล้ว `herdr agent wait task-<เลข> --until idle --timeout 90000` เพราะ repo นี้เป็นของเจ้าของเอง · หน้าอื่นที่ไม่ใช่ trust ให้ notification แล้วจบรอบ ไม่ตอบแทน
 9. จดโควตาก่อนเริ่ม: `budget-check --log <repo>/task-<เลข> before --acct <acct>`
    แล้วส่งงาน: `herdr agent prompt task-<เลข> "/pick-task <ref>" --wait --timeout 7200000`
    ทุกโหมดใช้คำสั่งเดียวกัน `/pick-task` รู้โหมดจากสถานะใน `task.md` ของการ์ด
