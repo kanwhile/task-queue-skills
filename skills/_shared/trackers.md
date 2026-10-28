@@ -7,9 +7,10 @@
 
 ## notion
 
-ค่าใน `tracker`: `data source: collection://<id>` · `view: <URL ของ view คิว>` (ไม่บังคับ) · ช่อง `Status` · `GitHub Issue` (url) · `Issue #` (number) · `Priority` (ไม่บังคับ)
+ค่าใน `tracker`: `data source: collection://<id>` · `view: https://www.notion.so/<id ของ database ไม่มีขีด>?v=<id ของ view ไม่มีขีด>` (view คิว · ไม่บังคับ) · ช่อง `Status` · `GitHub Issue` (url) · `Issue #` (number) · `Priority` (ไม่บังคับ) · `repo: owner/name`
 
-- **อ่านคิว**: มี `view` → `notion-fetch` URL นั้น หยิบตามลำดับที่ view คืนมา · ไม่มี → `notion-query-data-sources` `SELECT url, Name, "Issue #", Priority, createdTime FROM "<data source>" WHERE Status = '<queued>' ORDER BY Priority, createdTime`
+- **อ่านคิว**: มี `view` → `notion-query-data-sources` แบบ `{"data":{"mode":"view","view_url":"<view>","page_size":10}}` ได้แถวตามตัวกรอง/ลำดับของ view (`notion-fetch` บน view คืนแค่ config ไม่คืนแถว) · ไม่มี `view` → mode sql: `SELECT url, Name, "Issue #", Priority FROM "<data source>" WHERE Status = ? ORDER BY Priority, createdTime` params `["<queued>"]`
+- **การ์ดสถานะใดสถานะหนึ่ง** (เช่น in-review): mode sql แบบเดียวกันเปลี่ยน params
 - **อ่านการ์ด**: `notion-fetch` URL → property ทุกช่อง + เนื้อหา (AC · รายละเอียด) · ไฟล์แนบดาวน์โหลดด้วย `notion-get-file-download-urls`
 - **เปลี่ยนสถานะ**: `notion-update-page` property `Status`
 - **เขียนกลับ**: `notion-update-page` ต่อท้ายเนื้อหาด้วย `## <หัวข้อ>` + ข้อความ · หัวข้อที่สกิลใช้: `## รอเจ้าของตัดสิน` · `## หยุดเพราะโควตา` · `## คำถาม` · ลิงก์ PR แปะเป็นบรรทัดเปล่า ๆ ในเนื้อหา
