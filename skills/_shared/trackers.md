@@ -21,7 +21,7 @@
 ค่าใน `tracker`: `owner: <login>` · `number: <เลข project>` · `repo: <owner/name>` (ไม่มี = repo ปัจจุบัน) · `priority field: <ชื่อช่อง>` (ไม่บังคับ)
 
 - **id ที่ต้องใช้** (หาใหม่ทุกครั้ง ไม่จำ): project id `gh project view <number> --owner <owner> --format json -q .id` · ช่อง Status และ option: `gh project field-list <number> --owner <owner> --format json | jq '.fields[] | select(.name=="Status") | {id, options}'` แล้วจับคู่ชื่อจาก `สถานะ`
-- **อ่านคิว**: `gh project item-list <number> --owner <owner> --format json --limit 500` → `.items[] | select(.content.type=="Issue" and .repository=="<repo>" and .status=="<queued>")` · เรียงด้วย priority field (คีย์ใน JSON เป็นชื่อช่องตัวพิมพ์เล็ก) แล้วเลข issue น้อยก่อน · item ที่ `.content.type=="DraftIssue"` ข้าม (ไม่มี issue ให้ผูก PR)
+- **อ่านคิว**: `gh project item-list <number> --owner <owner> --format json --limit 500` → `.items[] | select(.content.type=="Issue" and .content.repository=="<repo>" and .status=="<queued>")` (ใช้ `.content.repository` ที่เป็น `owner/name` · คีย์ `.repository` ชั้นนอกเป็น URL เต็ม) · เรียงด้วย priority field (คีย์ใน JSON เป็นชื่อช่องตัวพิมพ์เล็ก) แล้วเลข issue น้อยก่อน · item ที่ `.content.type=="DraftIssue"` ข้าม (ไม่มี issue ให้ผูก PR)
 - **อ่านการ์ด**: `gh issue view <n> -R <repo> --json title,body,labels,comments` · ไฟล์แนบ = ลิงก์ในเนื้อ issue
 - **เปลี่ยนสถานะ**: `gh project item-edit --project-id <project id> --id <item id> --field-id <status field id> --single-select-option-id <option id>` · item id มาจาก `.items[].id` ของ item-list (หา item ของ issue ด้วย `.content.number`)
 - **เขียนกลับ**: `gh issue comment <n> -R <repo> --body "## <หัวข้อ>…"` · ไม่แก้เนื้อ issue (เป็นสเปกของเจ้าของ) · ลิงก์ PR ไม่ต้องเขียน เพราะ `Closes #<n>` ใน PR ทำให้หาได้เอง
@@ -31,7 +31,7 @@
 
 ค่าใน `tracker`: `repo: <owner/name>` (ไม่มี = repo ปัจจุบัน) · `priority label prefix: <เช่น P>` (ไม่บังคับ) · ชื่อใน `สถานะ` คือชื่อ label
 
-- **อ่านคิว**: `gh issue list -R <repo> --label "<queued>" --state open --limit 200 --json number,title,labels,createdAt` · เรียง label priority (prefix น้อยก่อน เช่น P0 < P1) แล้วเลขน้อยก่อน
+- **อ่านคิว**: `gh issue list -R <repo> --label "<queued>" --state open --limit 200 --json number,title,labels,createdAt` · เรียง label priority (prefix น้อยก่อน เช่น P0 < P1) แล้วเลขน้อยก่อน · label ที่เพิ่งติดโผล่ในผล list ช้าราว 5 วินาที (index ของ GitHub) ถ้าเพิ่งติดเองให้รอก่อนอ่านซ้ำ
 - **อ่านการ์ด**: เหมือน github-project
 - **เปลี่ยนสถานะ**: `gh issue edit <n> -R <repo> --remove-label "<เดิม>" --add-label "<ใหม่>"` · ต้องถอดทุก label สถานะที่ติดอยู่ให้เหลือตัวเดียวเสมอ
 - **เขียนกลับ**: เหมือน github-project
@@ -59,6 +59,7 @@ gh pr view <n> -R <repo> --json state,url,headRefName,headRefOid,mergeStateStatu
 
 - **github-project**: ผูก repo เข้า Project ถ้ายังไม่ผูก: `gh api graphql -f query='mutation($p:ID!,$r:ID!){ linkProjectV2ToRepository(input:{projectId:$p,repositoryId:$r}){ repository{ id } } }' -F p=<project id> -F r=$(gh repo view --json id -q .id)`
   option ของ Status ที่ขาด (`Ready` `In Review`) **ให้เจ้าของเพิ่มเองในหน้า Project settings → Status → Add option** แล้วบอกชื่อให้ตรง `สถานะ`
+  issue ที่มีอยู่ก่อนผูก repo **ไม่เข้า Project เอง** (workflow "Auto-add" ของ Project กรองตาม repo ที่ตั้งไว้ใน UI): เพิ่มด้วย `gh project item-add <number> --owner <owner> --url <URL ของ issue>` ทุก issue ที่เปิดอยู่ แล้วบอกเจ้าของให้ตั้ง Auto-add ให้ครอบ repo นี้ด้วย · item ที่เพิ่มใหม่ Status เป็นค่าว่าง ให้ตั้ง `Todo` ด้วย item-edit
   ⛔ ห้ามใช้ `updateProjectV2Field` กับ `singleSelectOptions` — API สร้าง option id ใหม่ทั้งชุด และ**ค่า Status ของทุก item ในโปรเจกต์หายเป็นค่าว่าง** (เกิดจริง 28 ต.ค. 2026 กับ 147 item · กู้ได้แค่เดาจาก state ของ issue/PR) · การแก้ชื่อ/สี option ก็เช่นกัน
 - **github-issues**: `gh label list --json name` แล้วสร้างเฉพาะที่ขาด `gh label create "<ชื่อ>" --color <hex> --description "<คำอธิบาย>"`
 - **notion**: `notion-fetch` data source แล้วเช็กว่า `Status` มี option ครบ 4 ชื่อ และมีช่อง `GitHub Issue` / `Issue #` · ตรวจอย่างเดียว ไม่สร้าง (schema ของบอร์ดเป็นของเจ้าของ) · `view` เช็กด้วย `notion-fetch` ว่าเปิดได้
