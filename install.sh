@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ติดตั้งสกิลใน repo นี้ตามแบบแผนของเครื่อง: ไฟล์จริงอยู่ใน repo → ~/.agents/skills/<ชื่อ> ชี้มาที่นี่ →
-# ~/.claude/skills/<ชื่อ> และทุก ~/.claude-*/skills/<ชื่อ> ชี้ไป ../../.agents/skills/<ชื่อ>
+# ~/.claude/skills/<ชื่อ> และทุก ~/.claude-*/skills/<ชื่อ> (เฉพาะโฟลเดอร์ที่มี settings.json) ชี้ไป ../../.agents/skills/<ชื่อ>
 # รันซ้ำได้ · --uninstall ถอด symlink ที่สคริปต์นี้สร้าง
 set -euo pipefail
 here="$(cd "$(dirname "$0")" && pwd)"
@@ -8,7 +8,7 @@ lib="$HOME/.agents/skills"
 mode="${1:-install}"
 
 targets=("$HOME/.claude/skills")
-for d in "$HOME"/.claude-*/; do [ -d "$d" ] && targets+=("${d%/}/skills"); done
+for d in "$HOME"/.claude-*/; do [ -f "$d/settings.json" ] && targets+=("${d%/}/skills"); done
 
 link() { # link <path> <target>
   local path="$1" target="$2"
