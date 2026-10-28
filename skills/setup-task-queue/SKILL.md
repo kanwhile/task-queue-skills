@@ -19,7 +19,7 @@ description: ตั้ง repo ปัจจุบันให้ใช้ /run-t
    ชื่อสถานะไม่ต้องถาม: Notion ใช้ชื่อที่มีในบอร์ด · GitHub Project ใช้ `Todo / Ready / In Progress / In Review` · label ใช้ `ready-for-agent / in-progress / in-review / needs-info`
 4. ร่างไฟล์จาก `task-queue.template.md` ในโฟลเดอร์สกิลนี้ แล้วแสดงทั้งไฟล์ให้เจ้าของดูก่อนเขียน
    ค่าที่อนุมานได้แต่ไม่มั่นใจ ใส่ `⚠️ เดา:` นำหน้าบรรทัดนั้น ไม่ถามแยก · เจ้าของแก้แล้วค่อยเขียนลง `<root>/.claude/task-queue.md`
-5. เตรียม tracker ตาม `trackers.md` §เตรียม: ผูก repo เข้า Project + เติม option ที่ขาด · สร้าง label ที่ขาด · Notion ตรวจอย่างเดียว
+5. เตรียม tracker ตาม `trackers.md` §เตรียม: ผูก repo เข้า Project · option ของ Status ที่ขาดให้เจ้าของเพิ่มเองใน UI (บอกชื่อที่ต้องเพิ่มและรอจนเห็นใน `gh project field-list`) · สร้าง label ที่ขาด · Notion ตรวจอย่างเดียว
 6. เตรียม repo: เพิ่ม `.tasks/` และ `.claude/worktrees/` ใน `.gitignore` ถ้ายังไม่ถูก ignore (`git check-ignore`) · ถ้าถูก ignore ผ่าน `.git/info/exclude` ให้ย้ายมา `.gitignore` เพราะ exclude ไม่ติดไปกับ clone/worktree อื่น
    เพิ่มบรรทัดเดียวในไฟล์กฎของ repo: "คิวงานของ agent: `/run-task-queue` อ่าน `.claude/task-queue.md`" ถ้ายังไม่มี
 7. ตารางเครื่อง ✅/❌ รายงานอย่างเดียว ไม่แก้ให้: `gh auth status` มี scope `project` (ต้องมีเฉพาะ kind github-project) · `herdr` และ `budget-check` อยู่ใน `PATH` · symlink ของ `run-task-queue` `pick-task` `setup-task-queue` ครบใน `~/.claude/skills` และทุก `~/.claude-*/skills` (ขาด → บอกให้รัน `install.sh` ของ repo task-queue-skills) · `CLAUDE_CONFIG_DIR` ของบัญชีที่เลือกมีอยู่จริง

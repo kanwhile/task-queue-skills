@@ -57,9 +57,8 @@ gh pr view <n> -R <repo> --json state,url,headRefName,headRefOid,mergeStateStatu
 
 ## เตรียม tracker (ใช้โดย /setup-task-queue)
 
-- **github-project**: ผูก repo เข้า Project ถ้ายังไม่ผูก: `gh api graphql -f query='mutation($p:ID!,$r:ID!){ linkProjectV2ToRepository(input:{projectId:$p,repositoryId:$r}){ repository{ id } } }' -F p=<project id> -F r=$(gh repo view --json id -q .id)` · เพิ่ม option ของ Status ที่ขาด: `updateProjectV2Field` ต้องส่ง `singleSelectOptions` **ทั้งชุด** (ของเดิมตามลำดับเดิม + ของใหม่ แต่ละตัวมี `name` `color` `description`) · สี: `GRAY BLUE GREEN YELLOW ORANGE RED PINK PURPLE`
-  ```bash
-  gh api graphql -F f=<status field id> -f query='mutation($f:ID!){ updateProjectV2Field(input:{fieldId:$f, singleSelectOptions:[{name:"Todo",color:GRAY,description:""},{name:"Ready",color:BLUE,description:"พร้อมให้ agent หยิบ"},{name:"In Progress",color:YELLOW,description:""},{name:"In Review",color:PURPLE,description:"เปิด PR แล้ว"},{name:"Done",color:GREEN,description:""}]}){ projectV2Field{ ... on ProjectV2SingleSelectField{ options{ id name } } } } }'
-  ```
+- **github-project**: ผูก repo เข้า Project ถ้ายังไม่ผูก: `gh api graphql -f query='mutation($p:ID!,$r:ID!){ linkProjectV2ToRepository(input:{projectId:$p,repositoryId:$r}){ repository{ id } } }' -F p=<project id> -F r=$(gh repo view --json id -q .id)`
+  option ของ Status ที่ขาด (`Ready` `In Review`) **ให้เจ้าของเพิ่มเองในหน้า Project settings → Status → Add option** แล้วบอกชื่อให้ตรง `สถานะ`
+  ⛔ ห้ามใช้ `updateProjectV2Field` กับ `singleSelectOptions` — API สร้าง option id ใหม่ทั้งชุด และ**ค่า Status ของทุก item ในโปรเจกต์หายเป็นค่าว่าง** (เกิดจริง 28 ต.ค. 2026 กับ 147 item · กู้ได้แค่เดาจาก state ของ issue/PR) · การแก้ชื่อ/สี option ก็เช่นกัน
 - **github-issues**: `gh label list --json name` แล้วสร้างเฉพาะที่ขาด `gh label create "<ชื่อ>" --color <hex> --description "<คำอธิบาย>"`
 - **notion**: `notion-fetch` data source แล้วเช็กว่า `Status` มี option ครบ 4 ชื่อ และมีช่อง `GitHub Issue` / `Issue #` · ตรวจอย่างเดียว ไม่สร้าง (schema ของบอร์ดเป็นของเจ้าของ) · `view` เช็กด้วย `notion-fetch` ว่าเปิดได้
