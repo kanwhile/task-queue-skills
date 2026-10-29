@@ -6,7 +6,7 @@ description: ทำการ์ด 1 ใบจากบอร์ดของ rep
 # Pick task
 
 อ่าน `config.md` และ `trackers.md` ในโฟลเดอร์สกิลนี้ก่อน · config ไม่ครบ = หยุดตามที่ `config.md` บอก
-`<TASKS>` = `<root>/.tasks` · `<root>` ตาม `config.md` · `<acct>` = จาก `บัญชี` หรือ `budget-check --pick`
+`<TASKS>` = `<root>/.tasks` · `<root>` ตาม `config.md` · `<acct>` = จาก `บัญชี` หรือ `budget-check --pick` · ไม่มี `budget-check` → ข้ามทุกขั้นที่เรียกมัน ตาม `config.md`
 ไม่ได้รับ `<ref>` → อ่านคิวตาม `trackers.md` แล้วหยิบใบบนสุดที่ไม่ถูก Blocked by
 argument `--model <id>` = โมเดลที่ `/run-task-queue` เลือกให้ session นี้ตาม rubric ของ config · เขียนลงบรรทัด `โมเดล:` ที่หัว `task.md` ตอนสร้างไฟล์ (การ์ดเดิมที่มีไฟล์แล้วไม่แก้) เพื่อให้รอบแก้รีวิวใช้โมเดลเดิม
 
@@ -61,7 +61,7 @@ argument `--model <id>` = โมเดลที่ `/run-task-queue` เลื�
 
 ## เช็กโควตา
 
-รัน `budget-check --unattended --acct <acct>` แล้วทำตามผล:
+ไม่มี `budget-check` → ถือว่าได้ `OK` ไม่ต้องรันอะไร · มี → รัน `budget-check --unattended --acct <acct>` แล้วทำตามผล:
 
 - `OK`: ทำต่อตามปกติ
 - `ROUTE-EXTERNAL`: ทำต่อได้ แต่ส่งงานโค้ดให้ delegate ให้มากที่สุดตามหัวข้อ "ส่งงานให้ delegate" Claude เหลือแค่รีวิวกับ verify

@@ -10,7 +10,7 @@ description: ตัวคุมคิวงานของ repo ปัจจุ�
 session นี้แค่คุมคิว ไม่เขียนโค้ดเอง
 
 ก่อนทุกรอบอ่าน `config.md` (วิธีอ่าน `.claude/task-queue.md`) และ `trackers.md` (คำสั่งต่อ kind) ในโฟลเดอร์สกิลนี้ · config ไม่ครบ = หยุดตามที่ `config.md` บอก
-`<repo>` = basename ของ `<root>` · `<acct>` = จาก `บัญชี` หรือ `budget-check --pick` · `<ref>` และ **เลขของการ์ด** ตาม `trackers.md`
+`<repo>` = basename ของ `<root>` · `<acct>` = จาก `บัญชี` หรือ `budget-check --pick` · ไม่มี `budget-check` → ข้ามทุกขั้นที่เรียกมัน ตาม `config.md` · `<ref>` และ **เลขของการ์ด** ตาม `trackers.md`
 argument `--dry-run`: ทำข้อ 1–6 แล้วรายงานตามหัวข้อ "รายงาน dry-run" โดยไม่เปิด tab ไม่แตะบอร์ด ไม่ส่ง notification
 
 ## ทุกรอบ
@@ -28,7 +28,7 @@ argument `--dry-run`: ทำข้อ 1–6 แล้วรายงานตา
    - ลบ worktree แล้ว ถ้ามี `<root>/.tasks/<ชื่อ branch ตัด prefix/ ออก>/` ให้ย้ายไป `<root>/.tasks/_done/` เก็บเป็นประวัติ
 3. ด่านก่อนเริ่มงาน จบรอบนี้ถ้าข้อใดไม่ผ่าน:
    - มี agent ชื่อขึ้นต้นด้วย `task-` ใน `herdr agent list` เพราะทำได้ทีละงาน
-   - `budget-check --unattended --acct <acct>` ไม่ได้ `OK` (ทั้ง `ROUTE-EXTERNAL` และ `STOP`) เพราะงานหนึ่งใบอาจกินโควตาจนตายกลางทาง
+   - (ข้ามถ้าไม่มี `budget-check`) `budget-check --unattended --acct <acct>` ไม่ได้ `OK` (ทั้ง `ROUTE-EXTERNAL` และ `STOP`) เพราะงานหนึ่งใบอาจกินโควตาจนตายกลางทาง
      ส่ง `herdr notification show` บอกตัวเลขกับเวลารีเซ็ตเฉพาะรอบแรกที่เจอใน session นี้ รอบถัดไปที่ยังไม่ `OK` ให้จบเงียบ ๆ
 4. สำรวจ PR ที่ค้าง: การ์ดสถานะ `in-review` ทุกใบ → หา PR ของการ์ด → สุขภาพ PR (ทั้งสองอย่างตาม `trackers.md`) แล้วจัดกลุ่ม
    - `MERGED`: ไม่ทำอะไร (ข้อ 2 รอบถัดไปเก็บ worktree · เจ้าของย้ายการ์ดเอง)
@@ -57,13 +57,13 @@ argument `--dry-run`: ทำข้อ 1–6 แล้วรายงานตา
    ไม่ต้องสร้าง worktree เอง เพราะ `/pick-task` ย้ายตัวเองเข้า worktree ก่อนเริ่มทำงาน
 8. เริ่ม Claude ใน pane นั้น: `herdr agent start task-<เลข> --kind claude --pane <root_pane> --timeout 120000 -- --model <โมเดล>` (ตัด `-- --model …` ถ้า config ไม่มีหัวข้อ `โมเดล`)
    ได้ `agent_not_ready … blocked during startup` ให้ `herdr agent read task-<เลข> --source visible` ก่อน: ถ้าเป็นหน้าถาม trust folder ของ Claude (เจอครั้งแรกของแต่ละบัญชีต่อ repo) ให้ `herdr agent send-keys task-<เลข> down enter` แล้ว `herdr agent wait task-<เลข> --until idle --timeout 90000` เพราะ repo นี้เป็นของเจ้าของเอง · หน้าอื่นที่ไม่ใช่ trust ให้ notification แล้วจบรอบ ไม่ตอบแทน
-9. จดโควตาก่อนเริ่ม: `budget-check --log <repo>/task-<เลข> before --acct <acct> --tier <sonnet|opus|haiku ตามโมเดล>`
+9. จดโควตาก่อนเริ่ม (ข้ามถ้าไม่มี `budget-check`): `budget-check --log <repo>/task-<เลข> before --acct <acct> --tier <sonnet|opus|haiku ตามโมเดล>`
    แล้วส่งงาน: `herdr agent prompt task-<เลข> "/pick-task <ref> --model <โมเดล>" --wait --timeout 7200000` (ไม่มีโมเดลก็ไม่ต้องใส่ `--model`)
    ทุกโหมดใช้คำสั่งเดียวกัน `/pick-task` รู้โหมดจากสถานะใน `task.md` ของการ์ด
    รันเป็น background command เพราะ Bash ที่รอผลรอได้นานสุด 10 นาที แต่งานหนึ่งใบใช้ 15–60 นาที บวก self-review กับ ci ตาม config
 
 ## หลังงานจบ
-จดโควตาหลังจบ: `budget-check --log <repo>/task-<เลข> after --acct <acct>` แล้วเอาบรรทัดจาก `budget-check --cost <repo>/task-<เลข>` ใส่ใน notification หรือรายงานรอบนี้
+จดโควตาหลังจบ (ข้ามถ้าไม่มี `budget-check`): `budget-check --log <repo>/task-<เลข> after --acct <acct>` แล้วเอาบรรทัดจาก `budget-check --cost <repo>/task-<เลข>` ใส่ใน notification หรือรายงานรอบนี้
 ตัวเลขนี้ใช้ปรับเกณฑ์ในข้อ 3 ว่างานหนึ่งใบกินโควตากี่ %
 
 10. ปิด tab ที่สร้างในข้อ 7 ด้วย `herdr tab close` ได้เมื่อการ์ดเป็น `in-review` และหา PR เจอ (ทั้งโหมดใหม่และโหมดแก้)
