@@ -33,9 +33,11 @@ PR เปิดค้าง: 3
 ## โมเดล
 default: claude-opus-5-5
 conflict: claude-sonnet-5-5
-- Type เป็น Bug หรือ Task และ AC เป็นข้อ ๆ ชัดเจน และไม่แตะ schema/migration/กฎโดเมน → claude-sonnet-5-5
-- Type เป็น Feature หรือ AC มีคำว่า ออกแบบ · ตัดสิน · ADR · port → claude-opus-5-5
+โซนหนัก: <path/glob ของ schema · migration · กฎโดเมน · auth คั่นด้วย ·>
 - Priority P0 → claude-opus-5-5
+- Type เป็น Feature หรือ AC มีคำว่า ออกแบบ · ตัดสิน · ADR · port → claude-opus-5-5
+- peek แตะโซนหนัก หรือ peek ไม่ชัด → claude-opus-5-5
+- Type เป็น Bug หรือ Task และ AC เป็นข้อ ๆ ชัดเจน และ peek แตะไม่เกิน 5 ไฟล์ → claude-sonnet-5-5
 
 ## ก่อนทุกรอบ
 - <สกิลหรือคำสั่ง · ลบหัวข้อนี้ถ้าไม่มี>

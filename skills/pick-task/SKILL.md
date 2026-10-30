@@ -87,7 +87,7 @@ argument `--model <id>` = โมเดลที่ `/run-task-queue` เลื�
 
 ## ส่งงานให้ delegate
 
-ใช้สกิล `delegate-wave` เพื่อประหยัดโควตา Claude งานเล็กแค่ไฟล์เดียวหรือไม่กี่บรรทัดทำเองได้เลย
+ใช้สกิล `delegate-wave` เพื่อประหยัด token ของ Claude งานเล็กแค่ไฟล์เดียวหรือไม่กี่บรรทัดทำเองได้เลย
 "งานไหนให้ใคร" และ rules เพิ่มอยู่ใน `delegate` ของ config · กติกาที่คิวพึ่งและใช้ทุก repo:
 
 - เปิด pane ของ delegate ใน tab ตัวเอง ให้ cwd เป็น worktree ของงานนี้:

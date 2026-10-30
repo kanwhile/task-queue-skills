@@ -19,7 +19,7 @@ git clone https://github.com/kanwhile/task-queue-skills ~/Documents/GitHub/task-
 
 `install.sh` symlinks each skill into `~/.agents/skills/` and from there into `~/.claude/skills/` and every `~/.claude-*/skills/` (one symlink per skill, so each Claude config dir sees the same files). `install.sh --uninstall` removes only the links it made.
 
-Then, inside the repo you want to run: `/setup-task-queue`, check `/run-task-queue --dry-run`, and start the loop with `/loop /run-task-queue`.
+Then, inside the repo you want to run: `/setup-task-queue`, check `/run-task-queue --dry-run`, and start the loop with `/loop /run-task-queue`. Run that controller session on Sonnet (`claude --model claude-sonnet-5-5`): it only orchestrates, so Opus is wasted on it, while Haiku tends to skip the rarer branches (trust prompt, locked worktrees, blocked agents). The per-card model is chosen by the `โมเดล` rubric in the config.
 
 ## Layout
 
