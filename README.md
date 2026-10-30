@@ -35,4 +35,4 @@ Each skill folder holds symlinks `config.md` and `trackers.md` to `_shared/` so 
 
 ## Requirements
 
-`herdr`, `gh` (with the `project` scope for GitHub Projects), `budget-check` (the quota gate from this machine's tooling), and the `delegate-wave` / `herdr` skills for delegation.
+`herdr`, `gh` (with the `project` scope for GitHub Projects), `budget-check` (the quota gate from this machine's tooling; optional — without it the quota gate and cost log are skipped), and the `delegate-wave` / `herdr` skills for delegation.

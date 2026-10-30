@@ -14,7 +14,7 @@ description: ตั้ง repo ปัจจุบันให้ใช้ /run-t
    - `branch`: pattern จาก `gh pr list --state merged --limit 20 --json headRefName`
    - `กฎโค้ด` / `หลัง PR`: ไฟล์กฎของ repo (`AGENTS.md` `CLAUDE.md`) หาข้อที่ขึ้นต้นด้วยข้อห้าม/ต้องทำ และกฎแบบ "ทุกครั้งที่แก้ต้อง…" (เช่น sync wiki) ซึ่งเป็น `หลัง PR`
    - tracker ที่มีอยู่: `gh api graphql` ดู `projectsV2` ที่ผูกกับ repo · `gh project list --owner <owner>` · `gh label list` · Notion ถ้าเจ้าของเคยบอก
-   - บัญชี: `budget-check --all`
+   - บัญชี: `budget-check --all` · ไม่มี `budget-check` → เสนอ `default` และไม่ต้องถาม
 3. ถาม `AskUserQuestion` รอบเดียว เฉพาะที่อนุมานไม่ได้: tracker (เสนอตัวเลือกจากข้อ 2) · บัญชี · การแบ่งงาน delegate · ขีดจำกัด PR เปิดค้าง (เสนอ 3)
    หัวข้อ `โมเดล` ไม่ต้องถาม: ใส่ rubric จาก template แล้วให้เจ้าของแก้ตอนดูไฟล์ในข้อ 4 · `budget-check --help` บอก tier ที่ `--tier` รับ
    ชื่อสถานะไม่ต้องถาม: Notion ใช้ชื่อที่มีในบอร์ด · GitHub Project ใช้ `Todo / Ready / In Progress / In Review` · label ใช้ `ready-for-agent / in-progress / in-review / needs-info`
@@ -23,5 +23,5 @@ description: ตั้ง repo ปัจจุบันให้ใช้ /run-t
 5. เตรียม tracker ตาม `trackers.md` §เตรียม: ผูก repo เข้า Project · option ของ Status ที่ขาดให้เจ้าของเพิ่มเองใน UI (บอกชื่อที่ต้องเพิ่มและรอจนเห็นใน `gh project field-list`) · สร้าง label ที่ขาด · Notion ตรวจอย่างเดียว
 6. เตรียม repo: เพิ่ม `.tasks/` และ `.claude/worktrees/` ใน `.gitignore` ถ้ายังไม่ถูก ignore (`git check-ignore`) · ถ้าถูก ignore ผ่าน `.git/info/exclude` ให้ย้ายมา `.gitignore` เพราะ exclude ไม่ติดไปกับ clone/worktree อื่น
    เพิ่มบรรทัดเดียวในไฟล์กฎของ repo: "คิวงานของ agent: `/run-task-queue` อ่าน `.claude/task-queue.md`" ถ้ายังไม่มี
-7. ตารางเครื่อง ✅/❌ รายงานอย่างเดียว ไม่แก้ให้: `gh auth status` มี scope `project` (ต้องมีเฉพาะ kind github-project) · `herdr` และ `budget-check` อยู่ใน `PATH` · symlink ของ `run-task-queue` `pick-task` `setup-task-queue` ครบใน `~/.claude/skills` และทุก `~/.claude-*/skills` (ขาด → บอกให้รัน `install.sh` ของ repo task-queue-skills) · `CLAUDE_CONFIG_DIR` ของบัญชีที่เลือกมีอยู่จริง
+7. ตารางเครื่อง ✅/❌ รายงานอย่างเดียว ไม่แก้ให้: `gh auth status` มี scope `project` (ต้องมีเฉพาะ kind github-project) · `herdr` อยู่ใน `PATH` · `budget-check` อยู่ใน `PATH` (ไม่มี = ⚠️ ไม่บังคับ คิวทำงานได้แต่ไม่มีด่านโควตา) · symlink ของ `run-task-queue` `pick-task` `setup-task-queue` ครบใน `~/.claude/skills` และทุก `~/.claude-*/skills` (ขาด → บอกให้รัน `install.sh` ของ repo task-queue-skills) · `CLAUDE_CONFIG_DIR` ของบัญชีที่เลือกมีอยู่จริง
 8. สรุป: ไฟล์ที่เขียน · สิ่งที่สร้างบน tracker · ❌ ในตารางที่เจ้าของต้องแก้เอง · คำสั่งถัดไป `/run-task-queue --dry-run`

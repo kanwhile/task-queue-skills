@@ -4,13 +4,15 @@
 
 อ่านทั้งไฟล์ก่อนเริ่มทุกครั้ง · ไม่มีไฟล์ หรือไม่มีหัวข้อ `tracker` / `สถานะ` → หยุด แล้วบอกเจ้าของให้รัน `/setup-task-queue` · หัวข้ออื่นที่ไม่มี = ขั้นที่ใช้หัวข้อนั้นข้ามไป
 
+**ไม่มี `budget-check`** (`command -v budget-check` ว่าง) → ข้ามทุกขั้นที่เรียก `budget-check`: เช็กโควตาถือว่าได้ `OK` · จดโควตา (`--log` / `--cost`) ไม่ทำ · `<acct>` ที่ไม่มีหัวข้อ `บัญชี` = `default` · เช็กครั้งเดียวต่อ session
+
 ใต้หัวข้อเป็น markdown อิสระที่ agent อ่านแล้วทำตาม ไม่ใช่ shell ล้วน (บางขั้นคือ "เรียกสกิล /x")
 
 | หัวข้อ | ความหมาย | ใช้โดย |
 |---|---|---|
 | `tracker` | `kind:` หนึ่งใน `notion` · `github-project` · `github-issues` ตามด้วยค่าเฉพาะ kind (ดู `trackers.md`) | ทุกสกิล |
 | `สถานะ` | ชื่อจริงบนบอร์ดของสถานะ canonical 4 ตัว: `queued` (พร้อมให้ agent หยิบ) · `in-progress` · `in-review` (เปิด PR แล้ว) · `unclear` (ถามเจ้าของแล้วถอยออกจากคิว) · สำหรับ `github-issues` ค่าคือชื่อ label | ทุกสกิล |
-| `บัญชี` | `acct:` ชื่อบัญชีของ `budget-check` · `CLAUDE_CONFIG_DIR` = `~/.claude` เมื่อ acct เป็น `default` นอกนั้น `~/.claude-<acct>` · ไม่มีหัวข้อ → `budget-check --pick` เลือกให้ตอนเริ่มรอบ | run · pick |
+| `บัญชี` | `acct:` ชื่อบัญชีของ `budget-check` · `CLAUDE_CONFIG_DIR` = `~/.claude` เมื่อ acct เป็น `default` นอกนั้น `~/.claude-<acct>` · ไม่มีหัวข้อ → `budget-check --pick` เลือกให้ตอนเริ่มรอบ (ไม่มี `budget-check` = `default`) | run · pick |
 | `โมเดล` | rubric เลือกโมเดลของ Claude ที่ถือการ์ด: บรรทัด `default: <model id>` แล้วตามด้วยกฎ `- <เงื่อนไขที่อ่านได้จากการ์ดก่อนเริ่ม> → <model id>` ข้อแรกที่ตรงชนะ · `conflict: <model id>` สำหรับโหมดแก้ conflict · โหมดแก้รีวิวใช้โมเดลเดิมของการ์ดจาก `task.md` · ไม่มีหัวข้อ = ไม่ส่ง `--model` (ค่าตั้งของบัญชี) | run · pick |
 | `ขีดจำกัด` | `PR เปิดค้าง:` N · run-task-queue หยุดหยิบการ์ดใหม่เมื่อ PR ที่คิวเปิดไว้ยังเปิดอยู่ครบ N (ไม่มีหัวข้อ = 3) | run |
 | `ก่อนทุกรอบ` | สกิล/คำสั่งที่ run-task-queue รันก่อนข้ออื่นทุกรอบ | run |
