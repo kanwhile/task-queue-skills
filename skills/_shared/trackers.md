@@ -56,6 +56,11 @@ gh pr view <n> -R <repo> --json state,url,headRefName,headRefOid,mergeStateStatu
 - `reviewDecision` = `CHANGES_REQUESTED` → ดูว่าแก้แล้วหรือยัง: `submittedAt` ล่าสุดของ `.reviews[] | select(.state=="CHANGES_REQUESTED")` เทียบ `.commits[-1].committedDate` · commit ใหม่กว่า = แก้แล้ว รอเจ้าของรีวิวซ้ำ ไม่ต้องทำอะไร
 - ข้อความรีวิวที่ต้องอ่านตอนแก้: `.reviews[].body` · inline: `gh api repos/<repo>/pulls/<n>/comments` · comment ธรรมดา: `gh api repos/<repo>/issues/<n>/comments`
 
+**ตรา** = บรรทัดที่ agent ประกาศว่า head ไหนพร้อมให้เจ้าของดู มีทั้ง ``(head `<sha>`)`` และ `รอเจ้าของตัดสิน <n> ข้อ` ในบรรทัดเดียวกัน เช่น ``ส่งเจ้าของ (head `a1b2c3d`) · รอเจ้าของตัดสิน 0 ข้อ``
+- pick-task โพสต์เป็น comment ทุกครั้งที่ส่ง PR ให้เจ้าของ ทั้งตอนเปิด PR และรอบแก้ · run-task-queue ใช้ตัดสินว่า merge เองได้ไหม
+- ต้องเป็น comment ไม่ใช่ PR body เพราะ body ไม่มีเวลาให้เทียบ · ต้องเป็นสิ่งสุดท้ายที่ agent โพสต์ลง PR ในรอบนั้น เพราะอะไรที่มาหลังตราแรกถูกนับว่าเป็นเรื่องที่ agent ยังไม่ได้อ่าน
+- `<n>` = ข้อที่เขียนใต้ `## รอเจ้าของตัดสิน` ในรอบนั้น · PR ที่เคยมีตรา n > 0 จะไม่ถูก merge อัตโนมัติอีก เพราะคิวไม่รู้ว่าเจ้าของตอบครบหรือยัง
+
 ## เตรียม tracker (ใช้โดย /setup-task-queue)
 
 - **github-project**: ผูก repo เข้า Project ถ้ายังไม่ผูก: `gh api graphql -f query='mutation($p:ID!,$r:ID!){ linkProjectV2ToRepository(input:{projectId:$p,repositoryId:$r}){ repository{ id } } }' -F p=<project id> -F r=$(gh repo view --json id -q .id)`

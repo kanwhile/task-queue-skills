@@ -1,6 +1,6 @@
 ---
 name: run-task-queue
-description: ตัวคุมคิวงานของ repo ปัจจุบัน อ่านบอร์ดตาม .claude/task-queue.md (Notion / GitHub Project / GitHub Issues) แล้วเปิด Claude session ใน herdr tab ใหม่ให้ทำ 1 การ์ดต่อ 1 session รวมรอบแก้ conflict และแก้ตามรีวิวของ PR ที่ค้าง รับ --dry-run ใช้กับ /loop
+description: ตัวคุมคิวงานของ repo ปัจจุบัน อ่านบอร์ดตาม .claude/task-queue.md (Notion / GitHub Project / GitHub Issues) แล้วเปิด Claude session ใน herdr tab ใหม่ให้ทำ 1 การ์ดต่อ 1 session รวมรอบแก้ conflict และแก้ตามรีวิวของ PR ที่ค้าง และ merge PR ที่ผ่านทุกด่านเองเมื่อ config มีหัวข้อ merge รับ --dry-run ใช้กับ /loop
 ---
 
 # Run task queue
@@ -11,7 +11,7 @@ session นี้แค่คุมคิว ไม่เขียนโค้�
 
 ก่อนทุกรอบอ่าน `config.md` (วิธีอ่าน `.claude/task-queue.md`) และ `trackers.md` (คำสั่งต่อ kind) ในโฟลเดอร์สกิลนี้ · config ไม่ครบ = หยุดตามที่ `config.md` บอก
 `<repo>` = basename ของ `<root>` · `<acct>` = จาก `บัญชี` หรือ `budget-check --pick` · ไม่มี `budget-check` → ข้ามทุกขั้นที่เรียกมัน ตาม `config.md` · `<ref>` และ **เลขของการ์ด** ตาม `trackers.md`
-argument `--dry-run`: ทำข้อ 1–6 แล้วรายงานตามหัวข้อ "รายงาน dry-run" โดยไม่เปิด tab ไม่แตะบอร์ด ไม่ส่ง notification
+argument `--dry-run`: ทำข้อ 1–6 แล้วรายงานตามหัวข้อ "รายงาน dry-run" โดยไม่เปิด tab ไม่แตะบอร์ด ไม่ merge ไม่ส่ง notification
 
 ## ทุกรอบ
 1. รันทุกรายการใน `ก่อนทุกรอบ` ของ config ก่อนข้ออื่น แม้รอบนั้นจะจบเร็ว
@@ -35,8 +35,10 @@ argument `--dry-run`: ทำข้อ 1–6 แล้วรายงานตา
    - `CLOSED` โดยไม่ merge: ข้าม และ notification ครั้งเดียวต่อ session
    - `OPEN` + `mergeStateStatus` `DIRTY` → กลุ่ม **แก้ conflict**
    - `OPEN` + `CHANGES_REQUESTED` ที่ยังไม่แก้ → กลุ่ม **แก้รีวิว**
-   - `OPEN` อื่น ๆ → นับเป็น **PR เปิดค้าง**
+   - `OPEN` อื่น ๆ → นับเป็น **PR เปิดค้าง** · config มีหัวข้อ `merge` ให้เช็กด่านตามหัวข้อ "merge อัตโนมัติ" ด้วย ผ่านครบ = กลุ่ม **พร้อม merge**
    - การ์ด `in-review` ที่หา PR ไม่เจอ: notification ครั้งเดียวต่อ session (pick-task ลืมแปะลิงก์ หรือเจ้าของย้ายเอง) แล้วข้าม
+   มีกลุ่มพร้อม merge → merge ใบแรกตามหัวข้อ "merge อัตโนมัติ" แล้วนับใบนั้นออกจาก PR เปิดค้าง
+   รอบละใบเดียว เพราะ merge แล้ว PR ใบอื่นอาจชน `main` ต้องให้ GitHub คำนวณ `mergeStateStatus` ใหม่ก่อนรอบหน้า
 5. เลือกงานของรอบนี้ตามลำดับ หยุดที่ข้อแรกที่เจอ:
    1. การ์ดใบแรกในกลุ่มแก้ conflict
    2. การ์ดใบแรกในกลุ่มแก้รีวิว
@@ -61,8 +63,40 @@ argument `--dry-run`: ทำข้อ 1–6 แล้วรายงานตา
    - **ไม่ชัด** = ข้อ 2 ได้ 0 ไฟล์ หรือเต็ม 40 (คำค้นกว้างเกินจะเชื่อ)
 peek เป็นข้อเท็จจริงให้กฎของ config ใช้ ไม่ใช่ตัวเลือกโมเดลเอง · ไม่รู้ค่าไหน = ไม่ตรงกฎที่อ้างค่านั้น
 
+## merge อัตโนมัติ
+ทำเมื่อ config มีหัวข้อ `merge` เท่านั้น ไม่มี = เจ้าของ merge เองทุกใบ · แตะได้แค่ PR ที่หาเจอจากการ์ด `in-review` ในข้อ 4 ไม่แตะ PR ที่เจ้าของเปิดเองนอกบอร์ด
+merge แล้ว `main` ขยับทันทีและอาจ deploy ต่อเอง ด่านจึงเลือกฝั่งปลอดภัย: ไม่แน่ใจข้อไหน = ไม่ผ่าน ปล่อยให้เจ้าของ merge เองเหมือนเดิม
+
+เช็กด่านด้วย `merge-check.jq` ในโฟลเดอร์สกิลนี้ (`deny` = ค่าใน `ไม่ auto:` · `skip` = ค่าใน `ข้าม comment ของ:` ไม่มีบรรทัดนั้นตัด `--argjson` ตัวนั้นทิ้ง):
+```bash
+inline=$(gh api repos/<repo>/pulls/<n>/comments --paginate | jq -s 'add // []')
+gh pr view <n> -R <repo> --json number,state,isDraft,headRefOid,mergeStateStatus,reviews,body,comments,files,statusCheckRollup \
+  | jq -f <โฟลเดอร์สกิลนี้>/merge-check.jq --argjson inline "$inline" --argjson deny '["<prefix>", …]' --argjson skip '["<login>", …]'
+```
+ได้ `ready` · `fail` (เหตุที่ตก ขึ้นต้นด้วยเลขด่าน) · `head` · `checks` · `fail` มีแค่ `2 mergeStateStatus UNKNOWN` ให้รอ 3 วินาทีแล้วยิงซ้ำ
+ด่านที่ `merge-check.jq` ตรวจ:
+1. `OPEN` และไม่ใช่ draft · เจ้าของกันใบไหนไว้ได้ด้วยการกด Convert to draft
+2. `mergeStateStatus` `CLEAN` (ไม่ชน และ check/status ที่ head ไม่แดงหรือค้าง)
+3. ไม่มีใครที่รีวิวล่าสุดเป็น `CHANGES_REQUESTED` แม้จะ push แก้แล้ว เพราะแก้แล้วแปลว่ารอคนนั้นรีวิวซ้ำ
+4. **ตรา** (`trackers.md`) ล่าสุดชี้ head ปัจจุบัน และทุกตราใน PR รอเจ้าของตัดสิน 0 ข้อ
+5. ไม่มี comment · review · inline comment หลังตราแรก นอกจากตราเอง (ยกเว้น login ใน `ข้าม comment ของ:`)
+6. ไม่แตะ `.claude/task-queue.md` (PR ที่แก้กติกาของคิวเองต้องให้เจ้าของ merge) และ path ที่ขึ้นต้นด้วยค่าใน `ไม่ auto:`
+
+ด่านที่ session นี้ตรวจเอง:
+
+7. ทุกข้อใน `ด่าน:` ของ config (ส่วนใหญ่เป็นชื่อใน `checks` ที่ต้อง `SUCCESS`)
+
+ผ่านครบ 7 ข้อ → merge:
+1. `gh pr merge <n> -R <repo> --<วิธี> --match-head-commit <head>` · ห้าม `--admin` และ `--delete-branch` (worktree ยังใช้ branch อยู่ ข้อ 2 เก็บกวาดเอง)
+   error ว่า head ไม่ตรง = มี push ใหม่ระหว่างเช็ก ปล่อยไว้รอบหน้า · error อื่นส่ง notification แล้วข้าม ไม่ลองซ้ำ
+2. ทำ `หลัง merge:` ของ config · ไม่ผ่าน → notification ทันทีว่า PR ไหนตกข้อไหน ห้ามแก้หรือ revert เอง
+3. comment ใน PR ``merge อัตโนมัติโดย /run-task-queue (head `<sha 7 ตัว>`) · ผ่านด่าน 1–7`` แล้วส่ง notification `merge #<n> แล้ว · <ชื่อการ์ด>`
+   การ์ดไม่ต้องย้าย ข้อ 4 รอบหน้าเห็นเป็น `MERGED` เหมือนที่เจ้าของ merge เอง
+
+ตกด่าน 4–7 → notification ครั้งเดียวต่อ PR ต่อ session ว่า `#<n> รอเจ้าของ merge: <fail ตัวแรก>` · ตกด่าน 1–3 ไม่ต้องแจ้ง เพราะเป็นสถานะปกติระหว่างรอ CI หรือรอรีวิว
+
 ## รายงาน dry-run
-พิมพ์ตารางแล้วจบ: PR ค้างแต่ละใบกับกลุ่มที่จัด · PR เปิดค้าง n/ขีดจำกัด · คิว 5 ใบแรกพร้อมเหตุที่ข้าม (ถูกบล็อกโดย #n · draft) · ใบที่จะเปิดแสดงผล peek (ไฟล์ที่แตะ n · โซนหนัก <ไฟล์> · ไม่ชัด) กับโมเดลและกฎข้อที่ตรง ใบอื่นไม่ peek จึงไม่ต้องแสดงโมเดล · บรรทัดสุดท้าย "รอบนี้จะเปิด tab ให้ `<ref>` โหมด <…> โมเดล <…> (กฎข้อ <…> · peek <สรุป>)" หรือ "รอบนี้ไม่เปิดอะไร เพราะ <ข้อที่หยุด>"
+พิมพ์ตารางแล้วจบ: PR ค้างแต่ละใบกับกลุ่มที่จัด (config มี `merge` ให้ใส่ `fail` ตัวแรกของใบที่ไม่พร้อม merge ด้วย) · PR เปิดค้าง n/ขีดจำกัด (นับเหมือนใบแรกของกลุ่มพร้อม merge ถูก merge แล้ว) · คิว 5 ใบแรกพร้อมเหตุที่ข้าม (ถูกบล็อกโดย #n · draft) · ใบที่จะเปิดแสดงผล peek (ไฟล์ที่แตะ n · โซนหนัก <ไฟล์> · ไม่ชัด) กับโมเดลและกฎข้อที่ตรง ใบอื่นไม่ peek จึงไม่ต้องแสดงโมเดล · มีใบพร้อม merge ให้ขึ้นบรรทัด "รอบนี้จะ merge #<n>" ก่อนบรรทัดสุดท้าย · บรรทัดสุดท้าย "รอบนี้จะเปิด tab ให้ `<ref>` โหมด <…> โมเดล <…> (กฎข้อ <…> · peek <สรุป>)" หรือ "รอบนี้ไม่เปิดอะไร เพราะ <ข้อที่หยุด>"
 
 ## เปิด session ใหม่
 7. สร้าง tab ใหม่ใน workspace ปัจจุบัน แล้วอ่าน `.result.tab.tab_id` กับ `.result.root_pane.pane_id` จาก JSON ที่ตอบกลับ

@@ -16,7 +16,8 @@ description: ตั้ง repo ปัจจุบันให้ใช้ /run-t
    - `โซนหนัก` ของ `โมเดล`: dir หรือไฟล์ที่ชื่อมี migration · schema · prisma · drizzle · auth (`git ls-files | grep -iE 'migration|schema|prisma|drizzle|auth' | xargs -n1 dirname | sort -u`) และโฟลเดอร์กฎโดเมนที่ไฟล์กฎของ repo ชี้ถึง
    - tracker ที่มีอยู่: `gh api graphql` ดู `projectsV2` ที่ผูกกับ repo · `gh project list --owner <owner>` · `gh label list` · Notion ถ้าเจ้าของเคยบอก
    - บัญชี: `budget-check --all` · ไม่มี `budget-check` → เสนอ `default` และไม่ต้องถาม
-3. ถาม `AskUserQuestion` รอบเดียว เฉพาะที่อนุมานไม่ได้: tracker (เสนอตัวเลือกจากข้อ 2) · บัญชี · การแบ่งงาน delegate · ขีดจำกัด PR เปิดค้าง (เสนอ 3)
+   - `merge`: `วิธี` จาก `gh api repos/<repo>` (`allow_*_merge`) และ `git log --merges -5 origin/<default>` · `ด่าน` = check ที่ PR ล่าสุดที่ merge แล้วมีใน `statusCheckRollup` · `ไม่ auto` = `โซนหนัก` ที่เป็น migration/schema + `.github/` + ไฟล์ config deploy + ไฟล์กฎของ repo
+3. ถาม `AskUserQuestion` รอบเดียว เฉพาะที่อนุมานไม่ได้: tracker (เสนอตัวเลือกจากข้อ 2) · บัญชี · การแบ่งงาน delegate · ขีดจำกัด PR เปิดค้าง (เสนอ 3) · merge อัตโนมัติ (เสนอไม่เปิด เพราะ merge แล้วอาจ deploy ต่อเอง · ไม่เปิด = ลบหัวข้อ `merge`)
    หัวข้อ `โมเดล` ไม่ต้องถาม: ใส่ rubric จาก template เติม `โซนหนัก` จากข้อ 2 แล้วให้เจ้าของแก้ตอนดูไฟล์ในข้อ 4 · `budget-check --help` บอก tier ที่ `--tier` รับ
    ชื่อสถานะไม่ต้องถาม: Notion ใช้ชื่อที่มีในบอร์ด · GitHub Project ใช้ `Todo / Ready / In Progress / In Review` · label ใช้ `ready-for-agent / in-progress / in-review / needs-info`
 4. ร่างไฟล์จาก `task-queue.template.md` ในโฟลเดอร์สกิลนี้ แล้วแสดงทั้งไฟล์ให้เจ้าของดูก่อนเขียน

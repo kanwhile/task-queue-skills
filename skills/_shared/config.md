@@ -16,6 +16,7 @@
 | `โมเดล` | rubric เลือกโมเดลของ Claude ที่ถือการ์ด: `default: <model id>` · `conflict: <model id>` สำหรับโหมดแก้ conflict · `โซนหนัก: <path หรือ glob คั่นด้วย ·>` ส่วนของ repo ที่แตะแล้วงานหนักขึ้น (schema · migration · กฎโดเมน · auth) · แล้วตามด้วยกฎ `- <เงื่อนไข> → <model id>` ข้อแรกที่ตรงชนะ เงื่อนไขอ้างได้ทั้งข้อมูลบนการ์ด (Type · Priority · AC · ชื่อ) และผล peek โค้ดของ run-task-queue (ไฟล์ที่แตะ · โซนหนัก · ไม่ชัด) · โหมดแก้รีวิวใช้โมเดลเดิมของการ์ดจาก `task.md` · ไม่มีหัวข้อ = ไม่ส่ง `--model` (ค่าตั้งของบัญชี) | run · pick |
 | `ขีดจำกัด` | `PR เปิดค้าง:` N · run-task-queue หยุดหยิบการ์ดใหม่เมื่อ PR ที่คิวเปิดไว้ยังเปิดอยู่ครบ N (ไม่มีหัวข้อ = 3) | run |
 | `ก่อนทุกรอบ` | สกิล/คำสั่งที่ run-task-queue รันก่อนข้ออื่นทุกรอบ | run |
+| `merge` | เปิด merge อัตโนมัติ: run-task-queue merge PR ของการ์ด `in-review` ที่ผ่านทุกด่านเอง · `วิธี:` `merge` / `squash` / `rebase` (ไม่มี = `merge`) · `ด่าน:` ด่านเพิ่มของ repo เช่น check ที่ head ต้อง `SUCCESS` · `ไม่ auto:` path prefix คั่นด้วย `·` ที่ PR แตะแล้วเจ้าของต้อง merge เอง (migration · config deploy · ไฟล์กฎ · CI) · `ข้าม comment ของ:` login ของบอทที่ comment แล้วไม่นับว่ามีคนพูด · `หลัง merge:` เช็กหลัง merge · ไม่มีหัวข้อ = เจ้าของ merge เองทุกใบ | run |
 | `branch` | pattern ชื่อ branch เช่น `slice/<n>-<ชื่อ>` (ไม่มี = `task/<n>-<ชื่อ>`) | pick |
 | `setup` | สิ่งที่ทำหลังสร้าง worktree (ติดตั้ง · ก๊อปไฟล์ env · ของที่ต้องลบออกจาก env ของ worktree) | pick |
 | `verify` | คำสั่งที่ต้องเขียวก่อนเปิด PR และหลังแก้ PR + กฎกันชนกับ checkout หลัก (พอร์ต · state · วิธีปิดของตัวเอง) | pick |

@@ -42,6 +42,12 @@ conflict: claude-sonnet-5-5
 ## ก่อนทุกรอบ
 - <สกิลหรือคำสั่ง · ลบหัวข้อนี้ถ้าไม่มี>
 
+## merge
+- วิธี: <merge | squash | rebase ตามที่ repo ใช้ · ลบหัวข้อนี้ถ้าเจ้าของ merge เองทุกใบ>
+- ด่าน: <check ที่ head ต้อง SUCCESS เช่น CI>
+- ไม่ auto: <path prefix ของ migration · config deploy · .github/ · ไฟล์กฎของ repo คั่นด้วย ·>
+- หลัง merge: <เช็กหลัง merge · ลบบรรทัดนี้ถ้าไม่มี>
+
 ## branch
 task/<n>-<ชื่อ>
 
