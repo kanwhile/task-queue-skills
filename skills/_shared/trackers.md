@@ -7,14 +7,21 @@
 
 ## notion
 
-ค่าใน `tracker`: `data source: collection://<id>` · `view: https://www.notion.so/<id ของ database ไม่มีขีด>?v=<id ของ view ไม่มีขีด>` (view คิว · ไม่บังคับ) · ช่อง `Status` · `GitHub Issue` (url) · `Issue #` (number) · `Priority` (ไม่บังคับ) · `repo: owner/name`
+ค่าใน `tracker`: `data source: collection://<id>` · `view: https://www.notion.so/<id ของ database ไม่มีขีด>?v=<id ของ view ไม่มีขีด>` (view คิว · ไม่บังคับ) · ช่อง `Status` · `GitHub Issue` (url) · `Issue #` (number) · `Priority` (ไม่บังคับ) · `repo: owner/name` · `สเปก: issue` (ไม่บังคับ · ดู "อ่านการ์ด")
 
 - **อ่านคิว**: มี `view` → `notion-query-data-sources` แบบ `{"data":{"mode":"view","view_url":"<view>","page_size":10}}` ได้แถวตามตัวกรอง/ลำดับของ view (`notion-fetch` บน view คืนแค่ config ไม่คืนแถว) · ไม่มี `view` → mode sql: `SELECT url, Name, "Issue #", Priority FROM "<data source>" WHERE Status = ? ORDER BY Priority, createdTime` params `["<queued>"]`
 - **การ์ดสถานะใดสถานะหนึ่ง** (เช่น in-review): mode sql แบบเดียวกันเปลี่ยน params
 - **อ่านการ์ด**: `notion-fetch` URL → property ทุกช่อง + เนื้อหา (AC · รายละเอียด) · ไฟล์แนบดาวน์โหลดด้วย `notion-get-file-download-urls`
+  **`สเปก: issue`** และการ์ดมี `Issue #` → issue เป็นสเปกหลักแทน เพราะหน้า Notion สะสมประวัติ ผล QA และรูปจนยาวกว่า issue หลายเท่า:
+  1. property: mode sql `SELECT * FROM "<data source>" WHERE url LIKE ?` params `["%<id 32 หลักของหน้า>%"]` ได้ทุกช่องโดยไม่ดึงเนื้อหน้า · `url` ในผล sql ไม่มี `/p/` จึงเทียบด้วย id
+  2. สเปก: อ่านการ์ดแบบ github-project ด้วยเลข `Issue #` · issue ไม่มี AC ใช้ช่อง AC จากข้อ 1
+  3. `notion-fetch` เนื้อหน้าด้วยเมื่อข้อใดข้อหนึ่งจริง เพราะคำตอบและโน้ตของเจ้าของเขียนไว้ในหน้า Notion:
+     - เนื้อ issue บอกว่าสเปก ดีไซน์ หรือไฟล์แนบอยู่ในการ์ด
+     - เจอ `task.md` ของการ์ดแล้ว (กลับมาจาก `## คำถาม` หรือ `## หยุดเพราะโควตา`)
+     - ชื่อการ์ดขึ้นต้นด้วย `ตัดสิน:`
 - **เปลี่ยนสถานะ**: `notion-update-page` property `Status`
 - **เขียนกลับ**: `notion-update-page` ต่อท้ายเนื้อหาด้วย `## <หัวข้อ>` + ข้อความ · หัวข้อที่สกิลใช้: `## รอเจ้าของตัดสิน` · `## หยุดเพราะโควตา` · `## คำถาม` · ลิงก์ PR แปะเป็นบรรทัดเปล่า ๆ ในเนื้อหา
-- **หา PR**: ลิงก์ `github.com/<repo>/pull/<n>` ในเนื้อหาการ์ด และถ้ามี `Issue #` ให้ดู linked PR ของ issue (ด้านล่าง) ด้วย
+- **หา PR**: ลิงก์ `github.com/<repo>/pull/<n>` ในเนื้อหาการ์ด และถ้ามี `Issue #` ให้ดู linked PR ของ issue (ด้านล่าง) ด้วย · `สเปก: issue` ดู linked PR ของ issue ก่อน เจอแล้วไม่ต้องดึงเนื้อหน้า
 - **สร้างการ์ด** (ชื่อ · เนื้อ · สถานะ · Priority): เปิด issue คู่ก่อนด้วย `gh issue create -R <repo> --title "<ชื่อ>" --body-file <ไฟล์เนื้อ>` แล้ว `notion-create-pages` parent เป็น data source · property `Name` · `Status` · `Priority` · `GitHub Issue` / `Issue #` ของ issue ที่เพิ่งเปิด · เนื้อหน้า = เนื้อเดียวกัน · ref = URL ของหน้าใหม่
 - **issue**: การ์ดไม่มี `GitHub Issue` → pick-task ตัดสินเองว่าควรเปิด issue ไหม ถ้าเปิด `gh issue create -R <repo>` จากเนื้อการ์ด แล้วเขียน URL และเลขกลับ `GitHub Issue` / `Issue #`
 
