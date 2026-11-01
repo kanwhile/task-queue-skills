@@ -80,6 +80,7 @@ gh pr view <n> -R <repo> --json number,state,isDraft,headRefOid,mergeStateStatus
 3. ไม่มีใครที่รีวิวล่าสุดเป็น `CHANGES_REQUESTED` แม้จะ push แก้แล้ว เพราะแก้แล้วแปลว่ารอคนนั้นรีวิวซ้ำ
 4. **ตรา** (`trackers.md`) ล่าสุดชี้ head ปัจจุบัน และทุกตราใน PR รอเจ้าของตัดสิน 0 ข้อ
 5. ไม่มี comment · review · inline comment หลังตราแรก นอกจากตราเอง (ยกเว้น login ใน `ข้าม comment ของ:`)
+   comment เทียบลำดับด้วยเลข id ใน url ไม่ใช่ `createdAt` เพราะ GitHub เคยบันทึกเวลาของ comment ล้ำไปชั่วโมงหนึ่ง (PR ที่ผ่านจริงตกด่านนี้)
 6. ไม่แตะ `.claude/task-queue.md` (PR ที่แก้กติกาของคิวเองต้องให้เจ้าของ merge) และ path ที่ขึ้นต้นด้วยค่าใน `ไม่ auto:`
 
 ด่านที่ session นี้ตรวจเอง:
@@ -111,6 +112,11 @@ gh pr view <n> -R <repo> --json number,state,isDraft,headRefOid,mergeStateStatus
    รันเป็น background command เพราะ Bash ที่รอผลรอได้นานสุด 10 นาที แต่งานหนึ่งใบใช้ 15–60 นาที บวก self-review กับ ci ตาม config
 
 ## หลังงานจบ
+`--wait` ของข้อ 9 คืนผลเมื่อ agent จบ**เทิร์น** ไม่ใช่เมื่อการ์ดจบ: agent ที่รอ verify หรือ ci ผ่าน Monitor/background shell จะจบเทิร์นกลางงาน แล้วตื่นเองเมื่องานนั้นเสร็จ
+ก่อนทำข้ออื่นในหัวข้อนี้ อ่านสถานะการ์ด: ยังเป็น `in-progress` และ `task.md` ไม่มี `## หยุดเพราะโควตา` → รอรอบต่อไปด้วย background command
+`herdr agent wait task-<เลข> --until working --timeout 1800000 && herdr agent wait task-<เลข> --timeout 7200000` แล้วอ่านสถานะการ์ดซ้ำ
+ทำซ้ำจนการ์ดออกจาก `in-progress` · `--until working` หมดเวลา (agent ไม่ตื่นใน 30 นาที) = ค้าง → notification ตามท้ายข้อ 11
+
 จดโควตาหลังจบ (ข้ามถ้าไม่มี `budget-check`): `budget-check --log <repo>/task-<เลข> after --acct <acct>` แล้วเอาบรรทัดจาก `budget-check --cost <repo>/task-<เลข>` ใส่ใน notification หรือรายงานรอบนี้
 ตัวเลขนี้ใช้ปรับเกณฑ์ในข้อ 3 ว่างานหนึ่งใบกินโควตากี่ %
 
