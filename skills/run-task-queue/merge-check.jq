@@ -5,13 +5,16 @@ def stamp:
           split: (capture("แยกคำถามไป (?<r>[^ ·]+)").r // null)}
     end;
 
+def cid: (.url // "" | capture("issuecomment-(?<n>[0-9]+)")? | .n | tonumber) // null;
+
 .headRefOid as $head
 | ($ARGS.named.inline // []) as $inline
 | ($ARGS.named.deny // []) as $deny
 | ($ARGS.named.skip // []) as $skip
-| [.comments[] | (.body | stamp) as $s | select($s) | $s + {t: .createdAt}] as $stamps
+| ([.comments[] | (.body | stamp) as $s | select($s) | $s + {t: .createdAt, id: cid}] | sort_by(.id)) as $stamps
 | ([(.body | stamp | .n // 0)] + [$stamps[].n] | max) as $pending
 | ($stamps[0].t // null) as $first
+| ($stamps[0].id // null) as $firstid
 | [
     (if .state != "OPEN" then "1 state \(.state)" else empty end),
     (if .isDraft then "1 draft" else empty end),
@@ -25,7 +28,7 @@ def stamp:
      else empty end),
     (if $pending > 0 then "4 เคยมีเรื่องรอเจ้าของตัดสิน \($pending) ข้อ" else empty end),
     (if $first == null then empty else
-      ((.comments[] | select(.createdAt > $first and (.body | stamp) == null) | {k: "comment", by: .author.login, t: .createdAt}),
+      ((.comments[] | select((.body | stamp) == null) | cid as $c | select($c == null or $firstid == null or $c > $firstid) | {k: "comment", by: .author.login, t: .createdAt}),
        (.reviews[] | select(.submittedAt > $first) | {k: "review", by: .author.login, t: .submittedAt}),
        ($inline[] | select(.created_at > $first) | {k: "inline comment", by: .user.login, t: .created_at}))
       | select(.by as $b | $skip | index($b) | not)
