@@ -12,7 +12,8 @@ priority field: Priority
 <!-- kind: notion
 data source: collection://<id>
 view: <URL ของ view คิว>
-repo: <owner/name>  (ใช้ตอนเปิด issue ให้การ์ด) -->
+repo: <owner/name>  (ใช้ตอนเปิด issue ให้การ์ด)
+สเปก: issue  (การ์ดมี GitHub issue คู่ที่เขียนสเปกครบ · ลบบรรทัดนี้ถ้าสเปกอยู่ในหน้า Notion) -->
 
 <!-- kind: github-issues
 repo: <owner/name>
