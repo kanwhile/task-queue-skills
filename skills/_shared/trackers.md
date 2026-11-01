@@ -1,6 +1,6 @@
-# tracker — 5 การกระทำต่อ kind
+# tracker — 6 การกระทำต่อ kind
 
-ทุกสกิลในชุดนี้คุยกับบอร์ดผ่าน 5 การกระทำ: **อ่านคิว · อ่านการ์ด · เปลี่ยนสถานะ · เขียนกลับ · หา PR** · ค่าเฉพาะมาจากหัวข้อ `tracker` และ `สถานะ` ใน `.claude/task-queue.md`
+ทุกสกิลในชุดนี้คุยกับบอร์ดผ่าน 6 การกระทำ: **อ่านคิว · อ่านการ์ด · เปลี่ยนสถานะ · เขียนกลับ · หา PR · สร้างการ์ด** · ค่าเฉพาะมาจากหัวข้อ `tracker` และ `สถานะ` ใน `.claude/task-queue.md`
 
 **ref ของการ์ด** = สิ่งที่ส่งต่อระหว่างสกิลและใช้ตั้งชื่อ: `notion` = URL ของหน้า · GitHub ทั้งสองแบบ = `#<เลข issue>` · **เลขของการ์ด** (ใช้ตั้งชื่อ worktree/agent/branch) = เลข issue ถ้ามี ไม่มีก็ 8 ตัวท้ายของ id หน้า Notion
 `<repo>` = `owner/name` จาก `gh repo view --json nameWithOwner -q .nameWithOwner` ของ checkout ปัจจุบัน
@@ -15,6 +15,7 @@
 - **เปลี่ยนสถานะ**: `notion-update-page` property `Status`
 - **เขียนกลับ**: `notion-update-page` ต่อท้ายเนื้อหาด้วย `## <หัวข้อ>` + ข้อความ · หัวข้อที่สกิลใช้: `## รอเจ้าของตัดสิน` · `## หยุดเพราะโควตา` · `## คำถาม` · ลิงก์ PR แปะเป็นบรรทัดเปล่า ๆ ในเนื้อหา
 - **หา PR**: ลิงก์ `github.com/<repo>/pull/<n>` ในเนื้อหาการ์ด และถ้ามี `Issue #` ให้ดู linked PR ของ issue (ด้านล่าง) ด้วย
+- **สร้างการ์ด** (ชื่อ · เนื้อ · สถานะ · Priority): เปิด issue คู่ก่อนด้วย `gh issue create -R <repo> --title "<ชื่อ>" --body-file <ไฟล์เนื้อ>` แล้ว `notion-create-pages` parent เป็น data source · property `Name` · `Status` · `Priority` · `GitHub Issue` / `Issue #` ของ issue ที่เพิ่งเปิด · เนื้อหน้า = เนื้อเดียวกัน · ref = URL ของหน้าใหม่
 - **issue**: การ์ดไม่มี `GitHub Issue` → pick-task ตัดสินเองว่าควรเปิด issue ไหม ถ้าเปิด `gh issue create -R <repo>` จากเนื้อการ์ด แล้วเขียน URL และเลขกลับ `GitHub Issue` / `Issue #`
 
 ## github-project
@@ -27,6 +28,7 @@
 - **เปลี่ยนสถานะ**: `gh project item-edit --project-id <project id> --id <item id> --field-id <status field id> --single-select-option-id <option id>` · item id มาจาก `.items[].id` ของ item-list (หา item ของ issue ด้วย `.content.number`)
 - **เขียนกลับ**: `gh issue comment <n> -R <repo> --body "## <หัวข้อ>…"` · ไม่แก้เนื้อ issue (เป็นสเปกของเจ้าของ) · ลิงก์ PR ไม่ต้องเขียน เพราะ `Closes #<n>` ใน PR ทำให้หาได้เอง
 - **หา PR**: linked PR ของ issue (ด้านล่าง)
+- **สร้างการ์ด**: `gh issue create -R <repo> --title "<ชื่อ>" --body-file <ไฟล์เนื้อ>` → `gh project item-add <number> --owner <owner> --url <URL ของ issue> --format json -q .id` ได้ item id → ตั้ง Status แบบ "เปลี่ยนสถานะ" · Priority ตั้งด้วย item-edit แบบเดียวกันบน priority field (หา option id แบบเดียวกับ Status) · ref = `#<เลข issue>`
 
 ## github-issues
 
@@ -37,6 +39,7 @@
 - **เปลี่ยนสถานะ**: `gh issue edit <n> -R <repo> --remove-label "<เดิม>" --add-label "<ใหม่>"` · ต้องถอดทุก label สถานะที่ติดอยู่ให้เหลือตัวเดียวเสมอ
 - **เขียนกลับ**: เหมือน github-project
 - **หา PR**: linked PR ของ issue (ด้านล่าง)
+- **สร้างการ์ด**: `gh issue create -R <repo> --title "<ชื่อ>" --body-file <ไฟล์เนื้อ> --label "<สถานะ>" --label "<label priority>"` · ref = `#<เลข issue>`
 
 ## ใช้ร่วมกันทุก kind ที่มี issue
 
@@ -55,6 +58,12 @@ gh pr view <n> -R <repo> --json state,url,headRefName,headRefOid,mergeStateStatu
 - `mergeStateStatus` = `DIRTY` → ชน `main` ต้องแก้ conflict · ได้ `UNKNOWN` ให้รอ 3 วินาทีแล้วยิงซ้ำ (GitHub ยังคำนวณไม่เสร็จ)
 - `reviewDecision` = `CHANGES_REQUESTED` → ดูว่าแก้แล้วหรือยัง: `submittedAt` ล่าสุดของ `.reviews[] | select(.state=="CHANGES_REQUESTED")` เทียบ `.commits[-1].committedDate` · commit ใหม่กว่า = แก้แล้ว รอเจ้าของรีวิวซ้ำ ไม่ต้องทำอะไร
 - ข้อความรีวิวที่ต้องอ่านตอนแก้: `.reviews[].body` · inline: `gh api repos/<repo>/pulls/<n>/comments` · comment ธรรมดา: `gh api repos/<repo>/issues/<n>/comments`
+
+**ตรา** = บรรทัดที่ agent ประกาศว่า head ไหนพร้อมให้เจ้าของดู มีทั้ง ``(head `<sha>`)`` และ `รอเจ้าของตัดสิน <n> ข้อ` ในบรรทัดเดียวกัน เช่น ``ส่งเจ้าของ (head `a1b2c3d`) · รอเจ้าของตัดสิน 0 ข้อ``
+- pick-task โพสต์เป็น comment ทุกครั้งที่ส่ง PR ให้เจ้าของ ทั้งตอนเปิด PR และรอบแก้ · run-task-queue ใช้ตัดสินว่า merge เองได้ไหม
+- ต้องเป็น comment ไม่ใช่ PR body เพราะ body ไม่มีเวลาให้เทียบ · ต้องเป็นสิ่งสุดท้ายที่ agent โพสต์ลง PR ในรอบนั้น เพราะอะไรที่มาหลังตราแรกถูกนับว่าเป็นเรื่องที่ agent ยังไม่ได้อ่าน
+- `<n>` = ข้อที่บล็อก merge ซึ่งเขียนใต้ `## รอเจ้าของตัดสิน` ในรอบนั้น (ข้อที่แยกไปการ์ด `ตัดสิน:` ไม่นับ) · PR ที่เคยมีตรา n > 0 จะไม่ถูก merge อัตโนมัติอีก เพราะคิวไม่รู้ว่าเจ้าของตอบครบหรือยัง
+- pick-task แยกคำถามไปการ์ด `ตัดสิน:` แล้ว ตราต่อท้ายด้วย `· แยกคำถามไป <ref>` เช่น ``ส่งเจ้าของ (head `a1b2c3d`) · รอเจ้าของตัดสิน 0 ข้อ · แยกคำถามไป #480`` · run-task-queue ใส่ ref นี้ใน notification หลัง merge
 
 ## เตรียม tracker (ใช้โดย /setup-task-queue)
 
