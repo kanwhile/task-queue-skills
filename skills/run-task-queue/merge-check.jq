@@ -1,7 +1,8 @@
 def stamp:
   [splits("\n") | select(test("\\(head `[0-9a-f]{7,40}`\\)") and test("รอเจ้าของตัดสิน [0-9]+ ข้อ"))][-1]
   | if . == null then null
-    else {sha: capture("\\(head `(?<s>[0-9a-f]{7,40})`\\)").s, n: (capture("รอเจ้าของตัดสิน (?<n>[0-9]+) ข้อ").n | tonumber)}
+    else {sha: capture("\\(head `(?<s>[0-9a-f]{7,40})`\\)").s, n: (capture("รอเจ้าของตัดสิน (?<n>[0-9]+) ข้อ").n | tonumber),
+          split: (capture("แยกคำถามไป (?<r>[^ ·]+)").r // null)}
     end;
 
 .headRefOid as $head
@@ -36,6 +37,7 @@ def stamp:
 | {
     number,
     head: $head,
+    split: ($stamps[-1].split // null),
     ready: ($fail | length == 0),
     fail: $fail,
     checks: [.statusCheckRollup[] | {name: (.context // .name), state: (.state // .conclusion)}]

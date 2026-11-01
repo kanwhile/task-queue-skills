@@ -73,7 +73,7 @@ inline=$(gh api repos/<repo>/pulls/<n>/comments --paginate | jq -s 'add // []')
 gh pr view <n> -R <repo> --json number,state,isDraft,headRefOid,mergeStateStatus,reviews,body,comments,files,statusCheckRollup \
   | jq -f <โฟลเดอร์สกิลนี้>/merge-check.jq --argjson inline "$inline" --argjson deny '["<prefix>", …]' --argjson skip '["<login>", …]'
 ```
-ได้ `ready` · `fail` (เหตุที่ตก ขึ้นต้นด้วยเลขด่าน) · `head` · `checks` · `fail` มีแค่ `2 mergeStateStatus UNKNOWN` ให้รอ 3 วินาทีแล้วยิงซ้ำ
+ได้ `ready` · `fail` (เหตุที่ตก ขึ้นต้นด้วยเลขด่าน) · `head` · `checks` · `split` (ref ของการ์ด `ตัดสิน:` จากตราล่าสุด ไม่มี = null) · `fail` มีแค่ `2 mergeStateStatus UNKNOWN` ให้รอ 3 วินาทีแล้วยิงซ้ำ
 ด่านที่ `merge-check.jq` ตรวจ:
 1. `OPEN` และไม่ใช่ draft · เจ้าของกันใบไหนไว้ได้ด้วยการกด Convert to draft
 2. `mergeStateStatus` `CLEAN` (ไม่ชน และ check/status ที่ head ไม่แดงหรือค้าง)
@@ -90,7 +90,7 @@ gh pr view <n> -R <repo> --json number,state,isDraft,headRefOid,mergeStateStatus
 1. `gh pr merge <n> -R <repo> --<วิธี> --match-head-commit <head>` · ห้าม `--admin` และ `--delete-branch` (worktree ยังใช้ branch อยู่ ข้อ 2 เก็บกวาดเอง)
    error ว่า head ไม่ตรง = มี push ใหม่ระหว่างเช็ก ปล่อยไว้รอบหน้า · error อื่นส่ง notification แล้วข้าม ไม่ลองซ้ำ
 2. ทำ `หลัง merge:` ของ config · ไม่ผ่าน → notification ทันทีว่า PR ไหนตกข้อไหน ห้ามแก้หรือ revert เอง
-3. comment ใน PR ``merge อัตโนมัติโดย /run-task-queue (head `<sha 7 ตัว>`) · ผ่านด่าน 1–7`` แล้วส่ง notification `merge #<n> แล้ว · <ชื่อการ์ด>`
+3. comment ใน PR ``merge อัตโนมัติโดย /run-task-queue (head `<sha 7 ตัว>`) · ผ่านด่าน 1–7`` แล้วส่ง notification `merge #<n> แล้ว · <ชื่อการ์ด>` · `split` ไม่ใช่ null ให้ต่อท้าย ` · มีเรื่องให้ตัดสินที่ <split>`
    การ์ดไม่ต้องย้าย ข้อ 4 รอบหน้าเห็นเป็น `MERGED` เหมือนที่เจ้าของ merge เอง
 
 ตกด่าน 4–7 → notification ครั้งเดียวต่อ PR ต่อ session ว่า `#<n> รอเจ้าของ merge: <fail ตัวแรก>` · ตกด่าน 1–3 ไม่ต้องแจ้ง เพราะเป็นสถานะปกติระหว่างรอ CI หรือรอรีวิว
@@ -116,8 +116,10 @@ gh pr view <n> -R <repo> --json number,state,isDraft,headRefOid,mergeStateStatus
 
 10. ปิด tab ที่สร้างในข้อ 7 ด้วย `herdr tab close` ได้เมื่อการ์ดเป็น `in-review` และหา PR เจอ (ทั้งโหมดใหม่และโหมดแก้)
     worktree ของงานยังต้องอยู่ เผื่อรอบแก้ conflict/รีวิวในรอบหลัง ข้อ 2 จะลบเองเมื่อ PR merge
-11. การ์ดมีหัวข้อ `## หยุดเพราะโควตา` ที่ `/pick-task` เขียนไว้ ให้ปิด tab ได้เหมือนข้อ 10
-    แล้วส่ง notification บอกว่าการ์ดไหนหยุดค้างที่ branch ไหน worktree ยังเก็บไว้ให้ทำต่อ
-    นอกจากสองกรณีนี้ ถ้า agent อยู่ในสถานะ blocked, หมดเวลา หรือการ์ดยังไม่ถึง `in-review` อย่าปิด tab และอย่าตอบคำถามแทน
+11. `/pick-task` หยุดการ์ดไว้ให้เจ้าของ ให้ปิด tab ได้เหมือนข้อ 10 แล้วส่ง notification ครั้งเดียว · worktree เก็บไว้ทำต่อ (ข้อ 2 ไม่ลบเพราะยังไม่มี PR ที่ merge)
+    - การ์ดมีหัวข้อ `## หยุดเพราะโควตา` → บอกว่าการ์ดไหนหยุดค้างที่ branch ไหน
+    - การ์ดเป็น `unclear` และมีหัวข้อ `## คำถาม` → `<ชื่อการ์ด> มีคำถามรอเจ้าของ · ตอบในการ์ดแล้วย้ายกลับเข้าคิว`
+      ต้องปิด tab เพราะ agent `task-*` ที่ค้างอยู่ทำให้ด่านข้อ 3 จบทุกรอบ
+    นอกจากกรณีในข้อ 10–11 ถ้า agent อยู่ในสถานะ blocked, หมดเวลา หรือการ์ดยังไม่ถึง `in-review` อย่าปิด tab และอย่าตอบคำถามแทน
     ส่ง `herdr notification` บอกเจ้าของว่า task ไหนติดอยู่ที่ tab ไหน
 12. ปิดได้แค่ tab ที่ session นี้สร้าง และลบได้แค่ worktree `task-*` ตามเงื่อนไขในข้อ 2 เท่านั้น
