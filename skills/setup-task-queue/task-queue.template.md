@@ -1,6 +1,6 @@
 # task-queue
 
-อ่านโดยสกิล run-task-queue · pick-task · setup-task-queue · ความหมายแต่ละหัวข้ออยู่ใน config.md ของสกิล · หัวข้อที่ไม่ใช้ลบทิ้งได้ยกเว้น tracker และ สถานะ
+อ่านโดยสกิล run-task-queue · pick-task · refine-task · setup-task-queue · ความหมายแต่ละหัวข้ออยู่ใน config.md ของสกิล · หัวข้อที่ไม่ใช้ลบทิ้งได้ยกเว้น tracker และ สถานะ
 
 ## tracker
 kind: github-project
@@ -13,7 +13,8 @@ priority field: Priority
 data source: collection://<id>
 view: <URL ของ view คิว>
 repo: <owner/name>  (ใช้ตอนเปิด issue ให้การ์ด)
-สเปก: issue  (การ์ดมี GitHub issue คู่ที่เขียนสเปกครบ · ลบบรรทัดนี้ถ้าสเปกอยู่ในหน้า Notion) -->
+สเปก: issue  (การ์ดมี GitHub issue คู่ที่เขียนสเปกครบ · ลบบรรทัดนี้ถ้าสเปกอยู่ในหน้า Notion)
+ช่อง label: GitHub Labels  (multi-select ที่เก็บ label ของ issue · /refine-task ตั้งให้ตรงกับ issue · ลบบรรทัดนี้ถ้าไม่มี) -->
 
 <!-- kind: github-issues
 repo: <owner/name>
