@@ -7,7 +7,7 @@
 
 ## notion
 
-ค่าใน `tracker`: `data source: collection://<id>` · `view: https://www.notion.so/<id ของ database ไม่มีขีด>?v=<id ของ view ไม่มีขีด>` (view คิว · ไม่บังคับ) · ช่อง `Status` · `GitHub Issue` (url) · `Issue #` (number) · `Priority` (ไม่บังคับ) · `repo: owner/name` · `สเปก: issue` (ไม่บังคับ · ดู "อ่านการ์ด")
+ค่าใน `tracker`: `data source: collection://<id>` · `view: https://www.notion.so/<id ของ database ไม่มีขีด>?v=<id ของ view ไม่มีขีด>` (view คิว · ไม่บังคับ) · ช่อง `Status` · `GitHub Issue` (url) · `Issue #` (number) · `Priority` (ไม่บังคับ) · `repo: owner/name` · `สเปก: issue` (ไม่บังคับ · ดู "อ่านการ์ด") · `ช่อง label: <ชื่อช่อง multi-select ที่เก็บ label ของ issue>` (ไม่บังคับ · ดู §triage label)
 
 - **อ่านคิว**: มี `view` → `notion-query-data-sources` แบบ `{"data":{"mode":"view","view_url":"<view>","page_size":10}}` ได้แถวตามตัวกรอง/ลำดับของ view (`notion-fetch` บน view คืนแค่ config ไม่คืนแถว) · ไม่มี `view` → mode sql: `SELECT url, Name, "Issue #", Priority FROM "<data source>" WHERE Status = ? ORDER BY Priority, createdTime` params `["<queued>"]`
 - **การ์ดสถานะใดสถานะหนึ่ง** (เช่น in-review): mode sql แบบเดียวกันเปลี่ยน params
@@ -71,6 +71,18 @@ gh pr view <n> -R <repo> --json state,url,headRefName,headRefOid,mergeStateStatu
 - ต้องเป็น comment ไม่ใช่ PR body เพราะ body ไม่มีเวลาให้เทียบ · ต้องเป็นสิ่งสุดท้ายที่ agent โพสต์ลง PR ในรอบนั้น เพราะอะไรที่มาหลังตราแรกถูกนับว่าเป็นเรื่องที่ agent ยังไม่ได้อ่าน
 - `<n>` = ข้อที่บล็อก merge ซึ่งเขียนใต้ `## รอเจ้าของตัดสิน` ในรอบนั้น (ข้อที่แยกไปการ์ด `ตัดสิน:` ไม่นับ) · PR ที่เคยมีตรา n > 0 จะไม่ถูก merge อัตโนมัติอีก เพราะคิวไม่รู้ว่าเจ้าของตอบครบหรือยัง
 - pick-task แยกคำถามไปการ์ด `ตัดสิน:` แล้ว ตราต่อท้ายด้วย `· แยกคำถามไป <ref>` เช่น ``ส่งเจ้าของ (head `a1b2c3d`) · รอเจ้าของตัดสิน 0 ข้อ · แยกคำถามไป #480`` · run-task-queue ใส่ ref นี้ใน notification หลัง merge
+
+## triage label (ใช้โดย /refine-task)
+
+ชุดเดียวกับที่ `/to-spec` `/to-tickets` `/triage` ใช้ การ์ดจะมาทางไหนก็มีหน้าตาเดียวกัน
+role `needs-triage` · `needs-info` · `ready-for-agent` · `ready-for-human` → ใช้ชื่อจริงจากคอลัมน์ขวาของตารางใน `<root>/docs/agents/triage-labels.md` (ไฟล์ของ `/setup-matt-pocock-skills`) · ไม่มีไฟล์ = ชื่อเดียวกับ role
+การ์ดถือได้ทีละ role:
+- การ์ดมี issue (kind GitHub ทั้งสอง และ notion ที่มี `Issue #`): `gh issue edit <n> -R <repo> --add-label "<ใหม่>" --remove-label "<role อื่นที่ติดอยู่>"` · label ที่ยังไม่มีใน repo (`gh label list -R <repo> --json name`) ให้ `gh label create` ก่อน
+  `github-issues`: ทำ "เปลี่ยนสถานะ" ก่อน แล้วติดเฉพาะ role ที่ชื่อไม่ซ้ำกับ label สถานะ (เช่น `queued: ready-for-agent` ได้ไปพร้อมสถานะแล้ว)
+- notion ที่มี `ช่อง label`: ตั้งช่องนั้นให้ตรงกับ label ของ issue ด้วย `notion-update-page` เพราะ view คิวกรองด้วยช่องนี้ได้ · ไม่มีทั้ง issue และ `ช่อง label` → ข้าม ใช้แค่สถานะ
+
+**แก้สเปก**: kind GitHub ทั้งสอง และ notion ที่มี `สเปก: issue` + `Issue #` → แก้เนื้อ issue: `gh issue view <n> -R <repo> --json body -q .body > <ไฟล์>` แก้ไฟล์แล้ว `gh issue edit <n> -R <repo> --body-file <ไฟล์>` · notion อื่น → แก้เนื้อหน้าด้วย `notion-update-page` และถ้าการ์ดเก็บ AC ในช่อง property ให้แก้ช่องนั้นด้วย
+refine-task แก้เนื้อ issue ได้ เพราะเจ้าของ OK ร่างใน session แล้ว (pick-task ไม่แก้ ตาม "เขียนกลับ")
 
 ## เตรียม tracker (ใช้โดย /setup-task-queue)
 
